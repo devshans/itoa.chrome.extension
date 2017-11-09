@@ -1,0 +1,33 @@
+{
+    "manifest_version": 2,
+
+    "name": "iPhone autocorrect simulator - i To A",
+    "description": "Be hip and use the new form of \"i\" all the time without an iPhone.",
+    "version": "1.0",
+
+    "permissions": [
+	"background",
+	"tabs",
+	"*://*.google.com/",
+	"*://*.facebook.com/",
+	"*://*.reddit.com/",
+	"*://*.twitter.com/"
+    ],
+    "icons": {
+	"48":  "images/icon_48.png",
+	"128": "images/icon_128.png" 
+    },
+    "browser_action": {
+	"default_icon": {
+	    "38": "images/icon_38.png"
+	}
+    },
+    "content_scripts": [
+	{
+	    "matches": ["*://mail.google.com/*", "*://hangouts.google.com/*", "*://*.facebook.com/*", "*://*.reddit.com/*", "*://*.twitter.com/*"],
+	    "js": ["jquery-1.12.0.min.js", "itoa.extension.js"],
+	    "run_at": "document_end",
+	    "all_frames": true
+	}
+    ]
+}
