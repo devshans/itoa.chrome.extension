@@ -6,27 +6,25 @@
  * @license    : The MIT License (MIT) - see LICENSE
  * @description: Extension content script
  *   Listens on keystroke inputs and changes "i " to "A ?"
-*/
+ */
 
 
 /**
  * Create the ConvertIToA object for the Chrome extension
  */
 var ConvertIToA = new function(){
-
+    
     // DEBUG variable. Need to modify here to enable all debug console output. 
     var DEBUG = false;
     
     // Global content script enable
     var enabled = true; 
 
-    );
-
     // State variables
     var ConvertIToA     = false;
     var backspace       = false;
     var priorBackspace  = false;
-	var previousCharIsI = false;
+    var previousCharIsI = false;
 
     // Variables set in handleKeyPress for later use in handleInput when doHandleInput
     var doHandleInput = false;
@@ -44,13 +42,13 @@ var ConvertIToA = new function(){
     //   "false" will bind to the bubbling phase which can be
     //   broken with event.stopPropagation().
     if (window != null && window.addEventListener){
-        window.addEventListener('keypress', handleKeyPress,  true);
-		window.addEventListener('keydown',  handleBackspace, true);
-		window.addEventListener('input',    handleInput,     true);
+	window.addEventListener('keypress', handleKeyPress,  true);
+	window.addEventListener('keydown',  handleBackspace, true);
+	window.addEventListener('input',    handleInput,     true);
     } else {
-        document.documentElement.attachEvent('onkeypress', handleKeyPress);
-		document.documentElement.attachEvent('onkeydown', handleBackspace);
-		document.documentElement.attachEvent('oninput', handleKeyPress);
+	document.documentElement.attachEvent('onkeypress', handleKeyPress);
+	document.documentElement.attachEvent('onkeydown', handleBackspace);
+	document.documentElement.attachEvent('oninput', handleKeyPress);
     }    
 
     /** 
@@ -69,7 +67,7 @@ var ConvertIToA = new function(){
 	var isContentEditableDiv = false;
 
 	var elem = getElementFromEvent(evnt);
-	
+
 	// Check for supported HTML element types.
 	if (!(elem.type == "textarea" || elem.type == "text")) {
 	    if (elem.isContentEditable) {
@@ -82,24 +80,24 @@ var ConvertIToA = new function(){
 		       (contentEditableElem.childNodes[0].nodeName.toLowerCase() == "div" ||
 			contentEditableElem.childNodes[0].nodeName.toLowerCase() == "span"))
 		    contentEditableElem = contentEditableElem.childNodes[0];
-		
-			if (DEBUG) console.log("contentEditable text: " + contentEditableElem.textContent);
+
+		if (DEBUG) console.log("contentEditable text: " + contentEditableElem.textContent);
 	    } else {
-			if (DEBUG) console.log("unsupported element type: " + elem.type);
-			return; // EXIT function
+		if (DEBUG) console.log("unsupported element type: " + elem.type);
+		return; // EXIT function
 	    }
 	}
-	
-    // Determine the character code from the keyboard input key.
-    charCode = (evnt.charCode ? evnt.charCode : evnt.keyCode);
+
+	// Determine the character code from the keyboard input key.
+	charCode = (evnt.charCode ? evnt.charCode : evnt.keyCode);
 	if (DEBUG) console.log("charCode: " + charCode);		
 	if (DEBUG) console.log("ConvertIToA: " + ConvertIToA + " charKey: " + charKey);
 	if (DEBUG) console.log("previousCharIsI: " + previousCharIsI + " charKey: " + charKey);
-	
+
 	// We need to make a modification to the case of the character entered.
 	if (previousCharIsI && charCode == 32) {
-		
-		if (DEBUG) console.log("IS an i !");
+
+	    if (DEBUG) console.log("IS an i !");
 
 	    // Content editable divs are a bit annoying.
 	    //   At least in the case of Google hangouts, the text will be dynamically
@@ -114,7 +112,7 @@ var ConvertIToA = new function(){
 		var divText = contentEditableElem.textContent;
 		var range = window.getSelection().getRangeAt(0);		
 		divText = [divText.slice(0, range.startOffset), charKey, divText.slice(range.endOffset)].join('');
-		
+
 		cursorPosition = range.startOffset + 1;
 		if (DEBUG) console.log("cursorPosition: " + cursorPosition);
 
@@ -125,14 +123,14 @@ var ConvertIToA = new function(){
 					       evnt,
 					       divText,						   
 					       cursorPosition,
-						   1);
-		
+					       1);
+
 		// Try to do this once, can be done again later in event lifecycle
 		//   in handleInput if overwritten.
 		// This handles the case where an input event isn't fired later after keypress
 		//   but the text isn't overwritten either.
 		contentEditableElem.innerHTML = modifiedText;
-		
+
 		cursorPosition += 2;
 		setCursorPosition(contentEditableElem, cursorPosition);
 		// It's possible where's there's a case that an input event isn't fired BUT
@@ -151,16 +149,16 @@ var ConvertIToA = new function(){
 						   cursorPosition,
 						   0);
 		    $(this).val(modifiedText);
-			cursorPosition += 2;
+		    cursorPosition += 2;
 		    setCursorPosition($(this).get(0), cursorPosition);
 		    $(elem).unbind('input');
 		});
 	    }
 	} //end if(ConvertIToA)
-		
+
 	if (charCode == 105) previousCharIsI = true;
 	else                 previousCharIsI = false;
-	
+
     } //endfunction handleKeyPress
 
     /** 
@@ -173,13 +171,13 @@ var ConvertIToA = new function(){
      * @param  : evnt - KeyDown keyboard event. Defaults to window.event.
      */
     function handleBackspace(evnt){
-		if (!enabled) return;
-		var elem = getElementFromEvent(evnt);
-		priorBackspace = backspace;
-		backspace = (evnt.keyCode == 8);
-		if (!backspace) return;
-		if (DEBUG) console.log("Backspace key");
-		var cursorPosition = getCursorPosition(elem);
+	if (!enabled) return;
+	var elem = getElementFromEvent(evnt);
+	priorBackspace = backspace;
+	backspace = (evnt.keyCode == 8);
+	if (!backspace) return;
+	if (DEBUG) console.log("Backspace key");
+	var cursorPosition = getCursorPosition(elem);
     } //endfunction handleBackspace
 
     /** 
@@ -192,7 +190,7 @@ var ConvertIToA = new function(){
      */
     function handleInput(evnt) {
 	if (doHandleInput) {
-	    
+
 	    var elem = getElementFromEvent(evnt);
 	    contentEditableElem.innerHTML = modifiedText;
 	    setCursorPosition(contentEditableElem, cursorPosition);
@@ -226,7 +224,7 @@ var ConvertIToA = new function(){
      * @param: evnt           - Calling function that triggered the event.
      * @param: inputText      - Full text to modify.
      * @param: cursorPosition - Current index of the cursor in the text.
-	 * @param: nbsp           - Whether or not to add a "nbsp;" for certain elements
+     * @param: nbsp           - Whether or not to add a "nbsp;" for certain elements
      */    
     function getModifiedText(charCode, charKey, evnt, inputText, cursorPosition, nbsp){
 
@@ -234,17 +232,17 @@ var ConvertIToA = new function(){
 			       "inputText:"           + inputText +
 			       ", inputText.length: " + inputText.length +
 			       ", cursorPosition: "   + cursorPosition);
-	
+
 	if (nbsp) charKey = "A \uFFFD&nbsp;";
 	else      charKey = "A \uFFFD";
-	
+
 	// If appending to the end of the string:
 	//   1. Strip off last character of whole string.
 	//   2. Append with the modified one.
 	if (DEBUG) console.log("cursorPosition: " + cursorPosition + " length: " + inputText.length); 
 	if (cursorPosition == (inputText.length+1)) {
 	    var trimmedInput = inputText.substr(0,(inputText.length - 2));
-		inputText = trimmedInput + " " + charKey;
+	    inputText = trimmedInput + " " + charKey;
 	    if (DEBUG) console.log("trimmedInput: " + trimmedInput + " charKey: " + charKey); 
 	}
 	// Otherwise, we need to:
@@ -258,7 +256,7 @@ var ConvertIToA = new function(){
 	    inputText = firstHalf + charKey + secondHalf;
 	    if (DEBUG) console.log("firstHalf: " + firstHalf + " secondHalf: " + secondHalf); 
 	}
-	
+
 	return inputText;
     } //endfunction getModifiedText
 
@@ -272,17 +270,17 @@ var ConvertIToA = new function(){
      */        
     function getCursorPosition(elem) {
 
-		var cursorPosition;
-		if (elem.setSelectionRange) {
-			cursorPosition = elem.selectionStart;
-		} else {
-			var sel = window.getSelection();
-			var range = sel.getRangeAt(0);
-			cursorPosition = range.startOffset;
-		}
-		
-		return cursorPosition;
-		
+	var cursorPosition;
+	if (elem.setSelectionRange) {
+	    cursorPosition = elem.selectionStart;
+	} else {
+	    var sel = window.getSelection();
+	    var range = sel.getRangeAt(0);
+	    cursorPosition = range.startOffset;
+	}
+
+	return cursorPosition;
+
     } //endfunction getCursorPosition
 
     /** 
@@ -301,7 +299,7 @@ var ConvertIToA = new function(){
 	if (elem.setSelectionRange) {
 	    elem.setSelectionRange(cursorPosition, cursorPosition);
 	}
-	
+
 	// Content editable div
 	else { 
 	    var textElem = elem.firstChild;
@@ -313,6 +311,6 @@ var ConvertIToA = new function(){
 	    sel.addRange(range);
 	}    
     } //endfunction setCursorPosition
-     
+
 
 }(); //end ConvertIToA
